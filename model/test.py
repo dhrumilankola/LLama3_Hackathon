@@ -6,7 +6,7 @@ from llama_index.embeddings.together import TogetherEmbedding
 from llama_index.llms.together import TogetherLLM
 from llama_index.core.chat_engine import CondenseQuestionChatEngine
 from llama_index.core.base.llms.types import ChatMessage
-from llama_index.core import Settings
+
 load_dotenv()
 api_key = os.getenv('TOGETHER_API_KEY')
 
@@ -20,21 +20,24 @@ class ConversationalRAG:
         embedding_model: str = "togethercomputer/m2-bert-80M-8k-retrieval",
         generative_model: str = "meta-llama/Llama-3-8b-chat-hf"
     ):
-        Settings.llm = TogetherLLM(
-            generative_model,
-            temperature=0.7,
-            max_tokens=512,
-            top_p=0.9,
-            api_key=api_key,
-            is_chat_model=False,
-            completion_to_prompt=completion_to_prompt
+        self.service_context = ServiceContext.from_defaults(
+            llm=TogetherLLM(
+                generative_model,
+                temperature=0.8,
+                max_tokens=256,
+                top_p=0.7,
+                top_k=50,
+                is_chat_model=False,
+                completion_to_prompt=completion_to_prompt
+            ),
+            embed_model=TogetherEmbedding(embedding_model, api_key=api_key)
         )
-        Settings.embed_model = TogetherEmbedding(embedding_model, api_key=api_key)
         
         documents = SimpleDirectoryReader(document_dir).load_data()
-        self.index = VectorStoreIndex.from_documents(documents)
+        self.index = VectorStoreIndex.from_documents(documents, service_context=self.service_context)
         self.chat_engine = CondenseQuestionChatEngine.from_defaults(
-            query_engine=self.index.as_query_engine(similarity_top_k=3),
+            query_engine=self.index.as_query_engine(similarity_top_k=5),
+            service_context=self.service_context,
             verbose=True
         )
         self.chat_history: List[ChatMessage] = []
@@ -43,15 +46,7 @@ class ConversationalRAG:
         response = self.chat_engine.chat(query, chat_history=self.chat_history)
         self.chat_history.append(ChatMessage(role='user', content=query))
         self.chat_history.append(ChatMessage(role='assistant', content=str(response)))
-        
-        # Extract only the relevant part of the response
-        response_str = str(response)
-        if "[INST]" in response_str:
-            response_str = response_str.split("[INST]")[-1]
-        if "[/INST]" in response_str:
-            response_str = response_str.split("[/INST]")[0]
-        
-        return response_str.strip()
+        return str(response)
 
 # Usage
 document_dir = "./docs"
