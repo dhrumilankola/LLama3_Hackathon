@@ -1,11 +1,12 @@
 import os
-from typing import List, Tuple
+from typing import List
 from dotenv import load_dotenv
-from llama_index.core import SimpleDirectoryReader, ServiceContext, VectorStoreIndex, Document
+from llama_index.core import ServiceContext, VectorStoreIndex, Document
 from llama_index.embeddings.together import TogetherEmbedding
 from llama_index.llms.together import TogetherLLM
 from llama_index.core.chat_engine import CondenseQuestionChatEngine
 from llama_index.core.base.llms.types import ChatMessage
+import pdfplumber
 
 load_dotenv()
 api_key = os.getenv('TOGETHER_API_KEY')
@@ -27,12 +28,37 @@ def completion_to_prompt(completion: str) -> str:
 
     return f"<s>[INST] {system_prompt}\n\nHuman: {completion} [/INST]\n\nAssistant: </s>"
 
+def extract_text_from_pdf(pdf_path: str) -> str:
+    text_content = []
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            text_content.append(page.extract_text())
+            tables = page.extract_tables()
+            for table in tables:
+                if table:
+                    table_text = "\n".join([" | ".join(map(str, row)) for row in table])
+                    text_content.append(table_text)
+    return "\n".join(text_content)
+
+class SimpleTableDirectoryReader:
+    def __init__(self, directory: str):
+        self.directory = directory
+
+    def load_data(self) -> List[Document]:
+        documents = []
+        for file_name in os.listdir(self.directory):
+            if file_name.endswith('.pdf'):
+                file_path = os.path.join(self.directory, file_name)
+                text = extract_text_from_pdf(file_path)
+                documents.append(Document(text=text))
+        return documents
+
 class ConversationalRAG:
     def __init__(
         self,
         document_dir: str,
         embedding_model: str = "togethercomputer/m2-bert-80M-8k-retrieval",
-        generative_model: str = "meta-llama/Llama-3-8b-chat-hf"
+        generative_model: str = "meta-llama/Meta-Llama-3-70B-Instruct-Turbo"
     ):
         self.service_context = ServiceContext.from_defaults(
             llm=TogetherLLM(
@@ -47,10 +73,10 @@ class ConversationalRAG:
             embed_model=TogetherEmbedding(embedding_model, api_key=api_key)
         )
         
-        documents = SimpleDirectoryReader(document_dir).load_data()
+        documents = SimpleTableDirectoryReader(document_dir).load_data()
         self.index = VectorStoreIndex.from_documents(documents, service_context=self.service_context)
         self.chat_engine = CondenseQuestionChatEngine.from_defaults(
-            query_engine=self.index.as_query_engine(similarity_top_k=5),
+            query_engine=self.index.as_query_engine(similarity_top_k=25),
             service_context=self.service_context,
             verbose=True
         )
