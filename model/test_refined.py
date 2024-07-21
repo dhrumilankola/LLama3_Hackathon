@@ -32,16 +32,16 @@ class ConversationalRAG:
         self,
         document_dir: str,
         embedding_model: str = "togethercomputer/m2-bert-80M-8k-retrieval",
-        generative_model: str = "meta-llama/Llama-2-70b-chat-hf"
+        generative_model: str = "meta-llama/Llama-3-8b-chat-hf"
     ):
         self.service_context = ServiceContext.from_defaults(
             llm=TogetherLLM(
                 generative_model,
-                temperature=0.7,  # Slightly reduced for more focused responses
-                max_tokens=512,   # Increased to allow for more comprehensive answers
-                top_p=0.9,
+                temperature=0.8,
+                max_tokens=256,
+                top_p=0.7,
                 top_k=50,
-                is_chat_model=True,
+                is_chat_model=False,
                 completion_to_prompt=completion_to_prompt
             ),
             embed_model=TogetherEmbedding(embedding_model, api_key=api_key)
@@ -50,15 +50,9 @@ class ConversationalRAG:
         documents = SimpleDirectoryReader(document_dir).load_data()
         self.index = VectorStoreIndex.from_documents(documents, service_context=self.service_context)
         self.chat_engine = CondenseQuestionChatEngine.from_defaults(
-            query_engine=self.index.as_query_engine(similarity_top_k=3),  # Reduced to focus on most relevant docs
+            query_engine=self.index.as_query_engine(similarity_top_k=5),
             service_context=self.service_context,
-            verbose=True,
-            condense_question_prompt=(
-                "Given the following conversation history and a new question, rephrase the new question to be a standalone question that captures all necessary context from the conversation history.\n"
-                "Chat History:\n{chat_history}\n"
-                "New Question: {question}\n"
-                "Standalone question:"
-            )
+            verbose=True
         )
         self.chat_history: List[ChatMessage] = []
 
@@ -72,12 +66,10 @@ class ConversationalRAG:
 document_dir = "./docs"
 rag = ConversationalRAG(document_dir)
 
-print("Welcome to the Student Assistant AI. Ask questions about the provided documents, or type 'exit' to quit.")
-
 while True:
     query = input("You: ")
     if query.lower() in ['exit', 'quit', 'bye']:
-        print("Thank you for using the Student Assistant AI. Goodbye!")
+        print("Goodbye!")
         break
     response = rag.chat(query)
     print(f"AI: {response}")
