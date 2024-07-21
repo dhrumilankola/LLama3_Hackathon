@@ -108,16 +108,10 @@ University students, including many international students unfamiliar with local
    - The chatbot improves over time with more interactions and feedback.
    - It adapts to provide better and more accurate assistance.
 
-![Workflow Diagram](/images/workflow.jpeg)
+
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
-
-## Contact
-
-For any questions or inquiries, please contact [your-email@example.com](mailto:your-email@example.com).
