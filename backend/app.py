@@ -17,5 +17,10 @@ def chat():
     response = rag.chat(query)
     return jsonify({"response": response})
 
+@app.route("/clear_chat", methods=["POST"])
+def clear_chat():
+    rag.clear_history()  
+    return jsonify({"message": "Chat history cleared"}), 200
+
 if __name__ == "__main__":
     app.run(debug=True)
