@@ -33,10 +33,7 @@ const ChatInterface = ({ insuranceType }) => {
     setDummyTextVisible(false);
   
     try {
-      const response = await axios.post('http://localhost:5000/chat', { 
-        query: input,
-        insurance_type: insuranceType.toLowerCase()
-      });
+      const response = await axios.post('http://localhost:5000/chat', { query: input });
       const botMessage = { sender: 'bot', text: response.data.response };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
@@ -46,14 +43,7 @@ const ChatInterface = ({ insuranceType }) => {
 
   const handleClearChat = async () => {
     try {
-      await axios.post('http://localhost:5000/clear_chat', 
-        { insurance_type: insuranceType.toLowerCase() },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      await axios.post('http://localhost:5000/clear_chat');
       setMessages([]);
       setDummyTextVisible(true);
     } catch (error) {
@@ -65,34 +55,45 @@ const ChatInterface = ({ insuranceType }) => {
     <div className="flex flex-col h-full bg-gradient-to-r from-blue-400 to-indigo-600 text-white p-4">
       <div className="bg-white rounded-lg shadow-lg mb-4 p-4 text-center text-gray-800 flex justify-between items-center">
         <h2 className="text-2xl font-bold">{insuranceType} Chat</h2>
-        <button 
-          onClick={handleClearChat} 
+        <button
+          onClick={handleClearChat}
           className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center"
         >
           <Trash2 className="h-4 w-4 mr-2" />
           Clear Chat
         </button>
       </div>
-      <div ref={chatContainerRef} className="flex-grow p-4 overflow-y-auto bg-white rounded-lg shadow-lg mb-4">
-        <div className="space-y-4">
-          {messages.map((msg, index) => (
-            <div key={index} className={`p-4 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-gray-800 self-start'}`}>
-              {msg.text}
-            </div>
-          ))}
+      <div className="flex flex-grow gap-4">
+        <div className="flex-1">
+          <iframe
+            src="/assets/ucship-brochure.pdf"
+            width="100%"
+            height="800px"
+            className="border border-gray-300 rounded-lg"
+            title="Insurance Document"
+          ></iframe>
+        </div>
+        <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto bg-white rounded-lg shadow-lg">
+          <div className="space-y-4">
+            {messages.map((msg, index) => (
+              <div key={index} className={`p-4 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-gray-800 self-start'}`}>
+                {msg.text}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="p-4 bg-white flex items-center rounded-lg shadow-lg">
-        <input 
-          type="text" 
-          value={input} 
-          onChange={(e) => setInput(e.target.value)} 
+      <div className="p-4 bg-white flex items-center rounded-lg shadow-lg mt-4">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           className="flex-grow p-2 border border-gray-300 rounded-lg text-gray-800"
           placeholder="Type your message..."
         />
-        <button 
-          onClick={handleSend} 
+        <button
+          onClick={handleSend}
           className="ml-2 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
