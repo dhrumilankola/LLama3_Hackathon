@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Trash2 } from 'lucide-react';
+import { useParams } from 'next/navigation';
 
-const ChatInterface = ({ insuranceType }) => {
+const ChatInterface = () => {
+  
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [dummyTextVisible, setDummyTextVisible] = useState(true);
   const chatContainerRef = useRef(null);
+  const params = useParams();
+  const insuranceType = params.type; // Get the insurance type from the URL
 
   useEffect(() => {
     if (dummyTextVisible) {
@@ -32,18 +36,57 @@ const ChatInterface = ({ insuranceType }) => {
     setInput('');
     setDummyTextVisible(false);
   
+    const payload = {
+      query: input,
+      insurance_type: insuranceType
+    };
+  
+    console.log("Sending payload:", payload);
+  
     try {
-      const response = await axios.post('http://localhost:5000/chat', { query: input });
-      const botMessage = { sender: 'bot', text: response.data.response };
-      setMessages((prevMessages) => [...prevMessages, botMessage]);
+      const response = await axios.post('http://localhost:5000/chat', payload, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      console.log("Received response:", response.data);
+  
+      if (response.data && response.data.response) {
+        const botMessage = { sender: 'bot', text: response.data.response };
+        setMessages((prevMessages) => [...prevMessages, botMessage]);
+      } else {
+        console.error("Unexpected response format:", response.data);
+        const errorMessage = { sender: 'bot', text: 'Sorry, I encountered an error. Please try again.' };
+        setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error data:', error.response.data);
+        console.error('Error status:', error.response.status);
+        console.error('Error headers:', error.response.headers);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request:', error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', error.message);
+      }
+  
+      const errorMessage = { sender: 'bot', text: 'Sorry, I encountered an error. Please try again.' };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
     }
   };
 
   const handleClearChat = async () => {
     try {
-      await axios.post('http://localhost:5000/clear_chat');
+      await axios.post('http://localhost:5000/clear_chat', {
+        insurance_type: insuranceType
+      });
       setMessages([]);
       setDummyTextVisible(true);
     } catch (error) {
