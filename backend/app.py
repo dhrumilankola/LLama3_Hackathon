@@ -23,10 +23,12 @@ insurance_rags = {
 
 @app.route("/chat", methods=["POST"])
 def chat():
+    print("Received request data:", request.data)
+    print("Received JSON:", request.json)
     data = request.json
     query = data.get("query", "")
     insurance_type = data.get("insurance_type", "").lower()
-    print(f"Received request: query={query}, insurance_type={insurance_type}")  # Add this line
+    print(f"Processed request: query={query}, insurance_type={insurance_type}")
     if not query or insurance_type not in insurance_rags:
         return jsonify({"error": f"Invalid query or insurance type. Received: query={query}, insurance_type={insurance_type}"}), 400
     response = insurance_rags[insurance_type].chat(query)
