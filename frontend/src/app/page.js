@@ -23,7 +23,9 @@ const HomePage = () => {
             <InsuranceOption key={option.id} id={option.id} name={option.name} imageSrc={option.imageSrc} />
           ))}
         </div>
-        <h2 className="text-3xl font-bold text-center my-8 text-gray-800">Have your own insurance brochure? Upload your insurance details</h2>
+        <h2 className="text-3xl font-bold text-center my-8 text-gray-800">Have your own insurance plan? Lean about it and clear your questions with the help of AI.</h2>
+        <h2 className="text-xl font-bold text-center  text-gray-800">Upload your insurance.</h2>
+        <br />
         <div className="flex justify-center">
           <UploadInsurance />
         </div>

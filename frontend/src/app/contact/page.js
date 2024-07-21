@@ -9,7 +9,7 @@ const ContactPage = () => {
       <div className="container mx-auto px-4 py-10">
         <h1 className="text-5xl font-bold text-center mb-8">Contact Us</h1>
         <p className="text-center text-xl mb-12">
-          This is the Contact Us page. You can add your contact information here.
+            We would love to hear from you! Write to use if you have any querries or suggestions.
         </p>
         <div className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg text-gray-800">
           <form>

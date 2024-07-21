@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from insurance_rag import InsuranceRAG
 import os
@@ -73,6 +73,20 @@ def upload_file():
 def remove_custom_documents():
     insurance_rags['custom'].remove_all_documents()
     return jsonify({"message": "All custom documents removed"}), 200
+
+@app.route("/docs/<insurance_type>/<filename>")
+def get_document(insurance_type, filename):
+    if insurance_type not in document_dirs:
+        return jsonify({"error": "Invalid insurance type"}), 400
+    
+    directory = document_dirs[insurance_type]
+    return send_from_directory(directory, filename)
+
+# Endpoint to serve uploaded PDFs
+@app.route("/uploads/<filename>")
+def get_uploaded_document(filename):
+    return send_from_directory('uploads', filename)
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf'}

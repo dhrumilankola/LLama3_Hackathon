@@ -1,22 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Trash2 } from 'lucide-react';
-import { useParams } from 'next/navigation';
 
-const ChatInterface = () => {
-  
+const ChatInterface = ({ insuranceType, customFileName }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [dummyTextVisible, setDummyTextVisible] = useState(true);
   const chatContainerRef = useRef(null);
-  const params = useParams();
-  const insuranceType = params.type; // Get the insurance type from the URL
 
   useEffect(() => {
     if (dummyTextVisible) {
       const initialMessages = [
-        { sender: 'bot', text: `Welcome to the ${insuranceType} insurance chat! How can I assist you today?` },
-        { sender: 'bot', text: `You can ask me about coverage details, claim process, and more.` },
+        { sender: 'bot', text: `Welcome to the ${insuranceType} insurance chat!\nHow can I assist you today?\nYou can ask me about coverage details, claim process, and more.` },
       ];
       setMessages(initialMessages);
     }
@@ -35,58 +30,19 @@ const ChatInterface = () => {
     setMessages([...messages, newMessage]);
     setInput('');
     setDummyTextVisible(false);
-  
-    const payload = {
-      query: input,
-      insurance_type: insuranceType
-    };
-  
-    console.log("Sending payload:", payload);
-  
+
     try {
-      const response = await axios.post('http://localhost:5000/chat', payload, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-  
-      console.log("Received response:", response.data);
-  
-      if (response.data && response.data.response) {
-        const botMessage = { sender: 'bot', text: response.data.response };
-        setMessages((prevMessages) => [...prevMessages, botMessage]);
-      } else {
-        console.error("Unexpected response format:", response.data);
-        const errorMessage = { sender: 'bot', text: 'Sorry, I encountered an error. Please try again.' };
-        setMessages((prevMessages) => [...prevMessages, errorMessage]);
-      }
+      const response = await axios.post('http://localhost:5000/chat', { query: input, type: insuranceType.toLowerCase() });
+      const botMessage = { sender: 'bot', text: response.data.response };
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
-      
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('Error data:', error.response.data);
-        console.error('Error status:', error.response.status);
-        console.error('Error headers:', error.response.headers);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error('Error request:', error.request);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Error message:', error.message);
-      }
-  
-      const errorMessage = { sender: 'bot', text: 'Sorry, I encountered an error. Please try again.' };
-      setMessages((prevMessages) => [...prevMessages, errorMessage]);
     }
   };
 
   const handleClearChat = async () => {
     try {
-      await axios.post('http://localhost:5000/clear_chat', {
-        insurance_type: insuranceType
-      });
+      await axios.post('http://localhost:5000/clear_chat');
       setMessages([]);
       setDummyTextVisible(true);
     } catch (error) {
@@ -94,8 +50,10 @@ const ChatInterface = () => {
     }
   };
 
-  // Generate the dynamic path for the PDF from the public directory
- const pdfPath = `/docs/${insuranceType.toLowerCase()}/${insuranceType.toLowerCase()}.pdf`;
+  // Determine the PDF path based on the insurance type
+  const pdfPath = insuranceType.toLowerCase() === 'custom'
+    ? `http://localhost:5000/uploads/${customFileName}`
+    : `/docs/${insuranceType.toLowerCase()}/${insuranceType.toLowerCase()}.pdf`;
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-r from-blue-400 to-indigo-600 text-white p-4">
@@ -123,7 +81,9 @@ const ChatInterface = () => {
           <div className="space-y-4">
             {messages.map((msg, index) => (
               <div key={index} className={`p-4 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-gray-800 self-start'}`}>
-                {msg.text}
+                {msg.text.split('\n').map((text, i) => (
+                  <div key={i}>{text}</div>
+                ))}
               </div>
             ))}
           </div>
