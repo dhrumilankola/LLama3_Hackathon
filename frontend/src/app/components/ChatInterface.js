@@ -47,10 +47,10 @@
 
     return (
       <div className="flex flex-col h-full bg-gradient-to-r from-blue-400 to-indigo-600 text-white p-4">
-        <div className="bg-white rounded-lg shadow-lg mb-4 p-4 text-center text-gray-800">
+        <div className="bg-white rounded-lg shadow-lg mb-4 p-4 text-center text-gray-800 ">
           <h2 className="text-2xl font-bold">{insuranceType} Chat</h2>
         </div>
-        <div ref={chatContainerRef} className="flex-grow p-4 overflow-y-auto bg-white rounded-lg shadow-lg mb-4">
+        <div ref={chatContainerRef} className="flex-grow p-4 overflow-y-auto bg-white rounded-lg shadow-lg mb-4 overflow-y-auto h-full max-h-80">
           <div className="space-y-4">
             {messages.map((msg, index) => (
               <div key={index} className={`p-4 rounded-lg ${msg.sender === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-gray-800 self-start'}`}>
