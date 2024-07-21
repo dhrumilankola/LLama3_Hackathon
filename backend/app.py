@@ -9,7 +9,6 @@ document_dir = "./docs"
 rag = ConversationalRAG(document_dir)
 
 @app.route("/chat", methods=["POST"])
-
 def chat():
     data = request.json
     query = data.get("query", "")
