@@ -26,14 +26,17 @@ const ChatInterface = ({ insuranceType }) => {
 
   const handleSend = async () => {
     if (input.trim() === '') return;
-
+  
     const newMessage = { sender: 'user', text: input };
     setMessages([...messages, newMessage]);
     setInput('');
     setDummyTextVisible(false);
-
+  
     try {
-      const response = await axios.post('http://localhost:5000/chat', { query: input });
+      const response = await axios.post('http://localhost:5000/chat', { 
+        query: input,
+        insurance_type: insuranceType.toLowerCase()
+      });
       const botMessage = { sender: 'bot', text: response.data.response };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
@@ -43,11 +46,18 @@ const ChatInterface = ({ insuranceType }) => {
 
   const handleClearChat = async () => {
     try {
-      await axios.post('http://localhost:5000/clear_chat');
+      await axios.post('http://localhost:5000/clear_chat', 
+        { insurance_type: insuranceType.toLowerCase() },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
       setMessages([]);
       setDummyTextVisible(true);
     } catch (error) {
-      console.error('Error clearing chat:', error);
+      console.error('Error clearing chat:', error.response ? error.response.data : error.message);
     }
   };
 
