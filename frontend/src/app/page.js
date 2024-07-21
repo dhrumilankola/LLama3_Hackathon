@@ -7,9 +7,9 @@ import UploadInsurance from './components/UploadInsurance';
 
 const HomePage = () => {
   const insuranceOptions = [
-    { id: '1', name: 'Dental' },
-    { id: '2', name: 'Vision' },
-    { id: '3', name: 'Medical' },
+    { id: '1', name: 'Dental', imageSrc: '/images/dental.jpg' },
+    { id: '2', name: 'Vision', imageSrc: '/images/vision.jpg' },
+    { id: '3', name: 'Medical', imageSrc: '/images/medical.jpg' },
   ];
 
   return (
@@ -18,12 +18,12 @@ const HomePage = () => {
       <div className="container mx-auto px-4">
         <WelcomeSection />
         <h2 className="text-3xl font-bold text-center my-8 text-gray-800">Choose Your Insurance</h2>
-        <div className="flex flex-wrap justify-center gap-6">
+        <div className="flex flex-wrap justify-center gap-8">
           {insuranceOptions.map(option => (
-            <InsuranceOption key={option.id} id={option.id} name={option.name} />
+            <InsuranceOption key={option.id} id={option.id} name={option.name} imageSrc={option.imageSrc} />
           ))}
         </div>
-        <h2 className="text-3xl font-bold text-center my-8 text-gray-800">Upload Your Insurance Details</h2>
+        <h2 className="text-3xl font-bold text-center my-8 text-gray-800">Have your own insurance brochure? Upload your insurance details</h2>
         <div className="flex justify-center">
           <UploadInsurance />
         </div>
