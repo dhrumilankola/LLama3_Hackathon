@@ -26,14 +26,14 @@ const ChatInterface = ({ insuranceType }) => {
 
   const handleSend = async () => {
     if (input.trim() === '') return;
-  
+
     const newMessage = { sender: 'user', text: input };
     setMessages([...messages, newMessage]);
     setInput('');
     setDummyTextVisible(false);
-  
+
     try {
-      const response = await axios.post('http://localhost:5000/chat', { query: input });
+      const response = await axios.post('http://localhost:5000/chat', { query: input, type: insuranceType.toLowerCase() });
       const botMessage = { sender: 'bot', text: response.data.response };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
@@ -51,6 +51,9 @@ const ChatInterface = ({ insuranceType }) => {
     }
   };
 
+  // Generate the dynamic path for the PDF from the public directory
+ const pdfPath = `/docs/${insuranceType.toLowerCase()}/${insuranceType.toLowerCase()}.pdf`;
+
   return (
     <div className="flex flex-col h-full bg-gradient-to-r from-blue-400 to-indigo-600 text-white p-4">
       <div className="bg-white rounded-lg shadow-lg mb-4 p-4 text-center text-gray-800 flex justify-between items-center">
@@ -66,7 +69,7 @@ const ChatInterface = ({ insuranceType }) => {
       <div className="flex flex-grow gap-4">
         <div className="flex-1">
           <iframe
-            src="/assets/ucship-brochure.pdf"
+            src={pdfPath}
             width="100%"
             height="800px"
             className="border border-gray-300 rounded-lg"

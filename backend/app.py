@@ -41,6 +41,7 @@ def clear_chat():
     insurance_rags[insurance_type].clear_history()
     return jsonify({"message": f"Chat history cleared for {insurance_type} insurance"}), 200
 
+
 @app.route("/upload", methods=["POST"])
 def upload_file():
     print("Upload request received")
@@ -73,6 +74,8 @@ def remove_custom_documents():
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pdf'}
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
