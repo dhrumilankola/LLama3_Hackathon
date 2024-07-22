@@ -1,4 +1,4 @@
-# AI Chatbot for Insurance Document Assistance - LLama 3 Hackathon Submission
+# InsureSearch - AI Assistance to help with Insurance - LLama 3 Hackathon Submission
 ## Team 0xAGI
 
 ## Introduction
