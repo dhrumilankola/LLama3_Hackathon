@@ -1,4 +1,4 @@
-# InsureSearch - AI Assistance to help with Insurance - LLama 3 Hackathon Submission
+# InsureSearch - AI Assistant to help with Insurance - LLama 3 Hackathon Submission
 ## Team 0xAGI
 
 ## Introduction
